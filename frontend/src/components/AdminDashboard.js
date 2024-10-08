@@ -11,6 +11,7 @@ function AdminDashboard() {
       <nav>
         <ul>
           <li><Link to="inventory">Gestión de Inventario</Link></li>
+          <li><Link to="orders">Gestión de Pedidos</Link></li>
           <li><Link to="users">Gestión de Usuarios</Link></li>
         </ul>
       </nav>

@@ -3,18 +3,23 @@ const Order = require('../models/Order');
 const router = express.Router();
 
 // Crear un nuevo pedido
-router.post('/api/orders', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { items, shippingAddress, total } = req.body;
 
-    // Crear un nuevo pedido
+    const detailedItems = items.map(item => ({
+      product: item.product._id, 
+      name: item.product.name,
+      quantity: item.quantity,
+      price: item.product.price
+    }));
+
     const newOrder = new Order({
-      items,
+      items: detailedItems,
       shippingAddress,
       total
     });
 
-    // Guardar el pedido en la base de datos
     const savedOrder = await newOrder.save();
     res.status(201).json(savedOrder);
   } catch (error) {
@@ -24,7 +29,7 @@ router.post('/api/orders', async (req, res) => {
 });
 
 // Obtener el historial de pedidos de un usuario (puedes ajustar esto para que obtenga por usuario autenticado)
-router.get('/api/orders/my-orders', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const orders = await Order.find();
     res.status(200).json(orders);

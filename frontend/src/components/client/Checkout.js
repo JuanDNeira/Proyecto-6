@@ -29,7 +29,7 @@ function Checkout() {
       await axios.post('/orders', order);
       localStorage.removeItem('cart');
       toast.success('Pedido realizado con éxito');
-      navigate('/order-history');
+      navigate('/client-dashboard/orders');
     } catch (error) {
       console.error('Error al realizar el pedido', error);
       toast.error('Error al realizar el pedido');

@@ -11,8 +11,14 @@ function OrderHistory() {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get('/orders/my-orders');
-      setOrders(response.data);
+      const response = await axios.get('/orders');
+      // Ordenar los pedidos por fecha y añadir un número secuencial
+      const sortedOrders = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const ordersWithSequence = sortedOrders.map((order, index) => ({
+        ...order,
+        sequenceNumber: sortedOrders.length - index
+      }));
+      setOrders(ordersWithSequence);
     } catch (error) {
       console.error('Error al obtener los pedidos', error);
       toast.error('Error al obtener los pedidos');
@@ -20,26 +26,27 @@ function OrderHistory() {
   };
 
   return (
-    <div>
-      <h2>Historial de Pedidos</h2>
+    <div className="container mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-4">Historial de Pedidos</h2>
       {orders.length === 0 ? (
-        <p>No tienes pedidos anteriores.</p>
+        <p className="text-gray-600">No tienes pedidos anteriores.</p>
       ) : (
-        <ul>
+        <ul className="space-y-6">
           {orders.map((order) => (
-            <li key={order._id}>
-              <h3>Pedido #{order._id}</h3>
-              <p>Fecha: {new Date(order.createdAt).toLocaleDateString()}</p>
+            <li key={order._id} className="border p-4 rounded-lg shadow">
+              <h3 className="text-xl font-semibold">Pedido #{order.sequenceNumber}</h3>
+              <p>Fecha: {new Date(order.createdAt).toLocaleString()}</p>
               <p>Estado: {order.status}</p>
-              <p>Total: ${order.total.toFixed(2)}</p>
-              <h4>Productos:</h4>
-              <ul>
-                {order.items.map((item) => (
-                  <li key={item._id}>
-                    {item.product.name} - Cantidad: {item.quantity} - ${item.price.toFixed(2)}
+              <p className="font-bold">Total: ${(order.total / 100).toFixed(2)}</p>
+              <h4 className="mt-2 font-semibold">Productos:</h4>
+              <ul className="list-disc list-inside">
+                {order.items.map((item, index) => (
+                  <li key={index}>
+                    {item.productName || 'Producto desconocido'} - Cantidad: {item.quantity}
                   </li>
                 ))}
               </ul>
+              <p>Dirección de envío: {order.shippingAddress}</p>
             </li>
           ))}
         </ul>

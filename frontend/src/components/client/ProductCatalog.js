@@ -49,7 +49,7 @@ function ProductCatalog() {
   return (
     <div>
       <h2>Catálogo de Productos</h2>
-      <div>
+      <div className="search-bar">
         <input
           type="text"
           placeholder="Buscar productos..."

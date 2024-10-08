@@ -51,7 +51,7 @@ const ProductForm = () => {
       const productToAdd = { ...product, category: categoryId };
       const response = await axios.post('/products', productToAdd);
       toast.success('Producto agregado correctamente');
-      navigate('//admin-dashboard/inventory');
+      navigate('/admin-dashboard/inventory');
       
       // Reset form and fetch updated categories
       setProduct({

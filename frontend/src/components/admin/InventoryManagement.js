@@ -9,8 +9,7 @@ function InventoryManagement() {
   const [categories, setCategories] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [filterCategory, setFilterCategory] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+
 
   useEffect(() => {
     fetchProducts();
@@ -60,10 +59,6 @@ function InventoryManagement() {
     toast.success('Producto eliminado correctamente');
   };
 
-  const filteredProducts = products
-    .filter(product => filterCategory ? product.category._id === filterCategory : true)
-    .filter(product => product.name.toLowerCase().includes(searchTerm.toLowerCase()));
-
   return (
     <div>
       <h2>Gestión de Inventario</h2>
@@ -71,21 +66,6 @@ function InventoryManagement() {
         <button onClick={() => setShowForm(!showForm)}>
           {showForm ? 'Cerrar Formulario' : 'Agregar Nuevo Producto'}
         </button>
-        <select 
-          value={filterCategory} 
-          onChange={(e) => setFilterCategory(e.target.value)}
-        >
-          <option value="">Todas las categorías</option>
-          {categories.map(cat => (
-            <option key={cat._id} value={cat._id}>{cat.name}</option>
-          ))}
-        </select>
-        <input 
-          type="text" 
-          placeholder="Buscar productos..." 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
       </div>
       {showForm && (
         <ProductForm 
@@ -96,7 +76,6 @@ function InventoryManagement() {
         />
       )}
       <ProductList 
-        products={filteredProducts}
         onEditProduct={handleEditProduct}
         onDeleteProduct={handleDeleteProduct}
       />
