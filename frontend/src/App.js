@@ -11,38 +11,42 @@ import Navbar from './components/Navbar';
 import AdminDashboard from './components/AdminDashboard';
 import ClientDashboard from './components/clientDashboard';
 import PrivateRoute from './components/PrivateRoute';
+import { AuthProvider } from './context/AuthContext';
 import './styles/App.css';
+import './tailwind.css';
 import '../node_modules/bootstrap-icons/font/bootstrap-icons.css'
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <Navbar />
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-        <Routes>
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/add-product" element={<PrivateRoute element={<ProductForm />} allowedRoles={['admin']} />} />
-          <Route path="/product" element={<SimpleProductList />} />
-          <Route path="/products" element={<PrivateRoute element={<ProductList />} allowedRoles={['admin', 'client']} />} />
-          <Route path="/admin-dashboard/*" element={<PrivateRoute element={<AdminDashboard />} allowedRoles={['admin']} />} />
-          <Route path="/client-dashboard/*" element={<PrivateRoute element={<ClientDashboard />} allowedRoles={['client']} />} />
-          <Route path="/" element={<Navigate to="/login" />} />
-        </Routes>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Navbar />
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
+          <Routes>
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/add-product" element={<PrivateRoute element={<ProductForm />} allowedRoles={['admin']} />} />
+            <Route path="/product" element={<SimpleProductList />} />
+            <Route path="/products" element={<PrivateRoute element={<ProductList />} allowedRoles={['admin', 'client']} />} />
+            <Route path="/admin-dashboard/*" element={<PrivateRoute element={<AdminDashboard />} allowedRoles={['admin']} />} />
+            <Route path="/client-dashboard/*" element={<PrivateRoute element={<ClientDashboard />} allowedRoles={['client']} />} />
+            <Route path="/" element={<Navigate to="/login" />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

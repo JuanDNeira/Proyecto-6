@@ -20,10 +20,8 @@ instance.interceptors.request.use(config => {
 instance.interceptors.response.use(response => {
   return response;
 }, error => {
-  // Puedes manejar errores aquí
   if (error.response) {
     console.error('Error en la respuesta:', error.response.data);
-    // Aquí podrías agregar un toast o un mensaje de error
   }
   return Promise.reject(error);
 });

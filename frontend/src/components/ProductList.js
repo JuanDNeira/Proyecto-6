@@ -7,12 +7,13 @@ import axios from '../axiosConfig';
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [editingId, setEditingId] = useState(null);
   const [editFormData, setEditFormData] = useState({});
+  const [filterCategory, setFilterCategory] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchProducts();
-    fetchCategories(); // Cargar las categorías para el select
+    fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
@@ -27,7 +28,7 @@ const ProductList = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('/categories'); // Asegúrate de tener esta ruta en el backend
+      const response = await axios.get('/categories');
       setCategories(response.data);
     } catch (error) {
       console.error('Error al obtener las categorías', error);
@@ -36,12 +37,12 @@ const ProductList = () => {
   };
 
   const handleEditClick = (product) => {
-    setEditingId(product._id);
     setEditFormData(product);
+    setIsModalOpen(true);
   };
 
-  const handleCancelEdit = () => {
-    setEditingId(null);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
     setEditFormData({});
   };
 
@@ -53,20 +54,15 @@ const ProductList = () => {
   const handleEditFormSubmit = async (event) => {
     event.preventDefault();
     try {
-      await axios.put(`/products/${editingId}`, editFormData);
-      const updatedProducts = products.map((product) =>
-        product._id === editingId ? editFormData : product
-      );
-      setProducts(updatedProducts);
-      setEditingId(null);
+      await axios.put(`/products/${editFormData._id}`, editFormData);
       toast.success('Producto actualizado correctamente');
+      window.location.reload(); 
     } catch (error) {
       console.error('Error al actualizar el producto', error);
       toast.error('Error al actualizar el producto');
     }
   };
 
-  
   const handleDeleteClick = async (productId) => {
     confirmAlert({
       title: '⚠️ Confirmación',
@@ -81,13 +77,7 @@ const ProductList = () => {
               toast.success('Producto eliminado correctamente');
             } catch (error) {
               console.error('Error al eliminar el producto', error);
-              if (error.response) {
-                toast.error(`Error al eliminar el producto: ${error.response.data.message || error.message}`);
-              } else if (error.request) {
-                toast.error('Error de conexión. Por favor, inténtalo de nuevo más tarde.');
-              } else {
-                toast.error('Ocurrió un error inesperado. Por favor, inténtalo de nuevo.');
-              }
+              toast.error('Error al eliminar el producto');
             }
           }
         },
@@ -98,109 +88,188 @@ const ProductList = () => {
       ]
     });
   };
-  
+
+  const filteredProducts = filterCategory
+    ? products.filter(product => product.category?._id === filterCategory)
+    : products;
 
   return (
-    <div>
-      <h2>Lista de Productos</h2>
-      <table className="table">
-        <thead>
+    <div className="p-6">
+      <h2 className="text-3xl font-bold mb-6 text-center">Gestión de Productos</h2>
+      <div className="mb-4 flex justify-center">
+        <select 
+          value={filterCategory} 
+          onChange={(e) => setFilterCategory(e.target.value)}
+          className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Todas las categorías</option>
+          {categories.map((category) => (
+            <option key={category._id} value={category._id}>{category.name}</option>
+          ))}
+        </select>
+      </div>
+      <table className="min-w-full bg-white border border-gray-300 rounded shadow-lg">
+        <thead className="bg-gray-200">
           <tr>
-            <th>Nombre</th>
-            <th>Precio</th>
-            <th>Cantidad</th>
-            <th>Descripción</th>
-            <th>Categoría</th>
-            <th>En Stock</th>
-            <th>Fecha</th>
-            <th>Acciones</th>
+            <th className="px-4 py-2 border">Nombre</th>
+            <th className="px-4 py-2 border">Precio</th>
+            <th className="px-4 py-2 border">Cantidad</th>
+            <th className="px-4 py-2 border">Descripción</th>
+            <th className="px-4 py-2 border">Categoría</th>
+            <th className="px-4 py-2 border">En Stock</th>
+            <th className="px-4 py-2 border">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {products.map((product) => (
-            <tr key={product._id}>
-              {editingId === product._id ? (
-                <>
-                  <td>
-                    <input
-                      type="text"
-                      name="name"
-                      value={editFormData.name || ''}
-                      onChange={handleEditFormChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      name="price"
-                      value={editFormData.price || ''}
-                      onChange={handleEditFormChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      name="quantity"
-                      value={editFormData.quantity || ''}
-                      onChange={handleEditFormChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      name="description"
-                      value={editFormData.description || ''}
-                      onChange={handleEditFormChange}
-                    />
-                  </td>
-                  <td>
-                    <select
-                      name="category"
-                      value={editFormData.category || ''}
-                      onChange={handleEditFormChange}
-                    >
-                      {categories.map((cat) => (
-                        <option key={cat._id} value={cat._id}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td>
-                    <select
-                      name="inStock"
-                      value={editFormData.inStock ? 'true' : 'false'}
-                      onChange={handleEditFormChange}
-                    >
-                      <option value="true">Sí</option>
-                      <option value="false">No</option>
-                    </select>
-                  </td>
-                  <td>{new Date(product.createdAt).toLocaleDateString()}</td>
-                  <td>
-                    <button onClick={handleEditFormSubmit}>Guardar</button>
-                    <button onClick={handleCancelEdit}>Cancelar</button>
-                  </td>
-                </>
-              ) : (
-                <>
-                  <td>{product.name}</td>
-                  <td>{product.price}</td>
-                  <td>{product.quantity}</td>
-                  <td>{product.description || 'Sin descripción'}</td>
-                  <td>{product.category?.name || 'Sin categoría'}</td>
-                  <td>{product.inStock ? 'Sí' : 'No'}</td>
-                  <td>{new Date(product.createdAt).toLocaleDateString()}</td>
-                  <td>
-                    <button onClick={() => handleEditClick(product)}>Editar</button>
-                    <button onClick={() => handleDeleteClick(product._id)}>Eliminar</button>
-                  </td>
-                </>
-              )}
+          {filteredProducts.map((product) => (
+            <tr key={product._id} className="hover:bg-gray-100">
+              <td className="px-4 py-2 border">{product.name}</td>
+              <td className="px-4 py-2 border">${product.price.toFixed(2)}</td>
+              <td className="px-4 py-2 border">{product.quantity}</td>
+              <td className="px-4 py-2 border">{product.description || 'Sin descripción'}</td>
+              <td className="px-4 py-2 border">{product.category?.name || 'Sin categoría'}</td>
+              <td className="px-4 py-2 border">
+                <span className={`relative inline-block px-3 py-1 font-semibold ${
+                  product.inStock ? 'text-green-900' : 'text-red-900'
+                } leading-tight`}>
+                  <span aria-hidden className={`absolute inset-0 ${
+                    product.inStock ? 'bg-green-200' : 'bg-red-200'
+                  } opacity-50 rounded-full`}></span>
+                  <span className="relative">{product.inStock ? 'Sí' : 'No'}</span>
+                </span>
+              </td>
+              <td className="px-4 py-2 border">
+                <button
+                  onClick={() => handleEditClick(product)}
+                  className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-600 transition duration-300"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={() => handleDeleteClick(product._id)}
+                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition duration-300"
+                >
+                  Eliminar
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl">
+            <h3 className="text-2xl font-bold mb-6">Editar Producto</h3>
+            <form onSubmit={handleEditFormSubmit} className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+                    Nombre
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    id="name"
+                    value={editFormData.name || ''}
+                    onChange={handleEditFormChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="price">
+                    Precio
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    id="price"
+                    value={editFormData.price || ''}
+                    onChange={handleEditFormChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="quantity">
+                    Cantidad
+                  </label>
+                  <input
+                    type="number"
+                    name="quantity"
+                    id="quantity"
+                    value={editFormData.quantity || ''}
+                    onChange={handleEditFormChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="category">
+                    Categoría
+                  </label>
+                  <select
+                    name="category"
+                    id="category"
+                    value={editFormData.category || ''}
+                    onChange={handleEditFormChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  >
+                    <option value="">Seleccione una categoría</option>
+                    {categories.map((cat) => (
+                      <option key={cat._id} value={cat._id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
+                  Descripción
+                </label>
+                <textarea
+                  name="description"
+                  id="description"
+                  value={editFormData.description || ''}
+                  onChange={handleEditFormChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="inStock">
+                  En Stock
+                </label>
+                <select
+                  name="inStock"
+                  id="inStock"
+                  value={editFormData.inStock ? 'true' : 'false'}
+                  onChange={handleEditFormChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                >
+                  <option value="true">Sí</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

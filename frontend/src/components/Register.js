@@ -29,7 +29,7 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      const response = await axios.post('/users/register', user);
+      await axios.post('/users/register', user);
       toast.success('Usuario registrado correctamente');
       navigate('/login');
     } catch (err) {
@@ -46,46 +46,74 @@ const Register = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2>Registrar Usuario</h2>
-      <form onSubmit={handleRegister}>
-        <div className="mb-3">
-          <label htmlFor="name" className="form-label">Nombre:</label>
-          <input
-            type="text"
-            name="name"
-            className="form-control"
-            value={user.name}
-            onChange={handleChange}
-            required
-          />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl w-full space-y-8 bg-white p-10 rounded-xl shadow-md">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Registrar Usuario
+          </h2>
         </div>
-        <div className="mb-3">
-          <label htmlFor="email" className="form-label">Email:</label>
-          <input
-            type="email"
-            name="email"
-            className="form-control"
-            value={user.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="password" className="form-label">Contraseña:</label>
-          <input
-            type="password"
-            name="password"
-            className="form-control"
-            value={user.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Registrando...' : 'Registrar'}
-        </button>
-      </form>
+        <form className="mt-8 space-y-6" onSubmit={handleRegister}>
+          <div className="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label htmlFor="name" className="sr-only">
+                Nombre
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-lg"
+                placeholder="Nombre"
+                value={user.name}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="email-address" className="sr-only">
+                Email
+              </label>
+              <input
+                id="email-address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-lg"
+                placeholder="Correo electrónico"
+                value={user.email}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Contraseña
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-lg"
+                placeholder="Contraseña"
+                value={user.password}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+          <div>
+            <button
+              type="submit"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={loading}
+            >
+              {loading ? 'Registrando...' : 'Registrar'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

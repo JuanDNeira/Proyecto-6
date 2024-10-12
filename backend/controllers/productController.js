@@ -20,7 +20,7 @@ const addProduct = async (req, res) => {
       quantity,
       description,
       category,
-      inStock: quantity > 0 // Si la cantidad es mayor a 0, está en stock
+      inStock: quantity > 0
     });
 
     await newProduct.save();
@@ -30,7 +30,7 @@ const addProduct = async (req, res) => {
   }
 };
 
-// Obtener productos (incluyendo la categoría relacionada)
+// Obtener productos
 const getProducts = async (req, res) => {
   try {
     const products = await Product.find().populate('category', 'name');

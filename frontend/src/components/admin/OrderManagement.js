@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../axiosConfig';
 import { toast } from 'react-toastify';
+import '../../tailwind.css';
 
 function OrderManagement() {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filterStatus, setFilterStatus] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -23,11 +25,15 @@ function OrderManagement() {
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
-      await axios.put(`/orders/${orderId}`, { status: newStatus });
-      setOrders(orders.map(order => 
-        order._id === orderId ? { ...order, status: newStatus } : order
-      ));
-      toast.success('Estado del pedido actualizado correctamente');
+      const response = await axios.put(`/orders/${orderId}`, { status: newStatus });
+      if (response.data) {
+        setOrders(orders.map(order =>
+          order._id === orderId ? { ...order, status: newStatus } : order
+        ));
+        toast.success('Estado del pedido actualizado correctamente');
+      } else {
+        throw new Error('La respuesta del servidor no incluye la orden actualizada');
+      }
     } catch (error) {
       console.error('Error al actualizar el estado del pedido', error);
       toast.error('Error al actualizar el estado del pedido');
@@ -36,6 +42,12 @@ function OrderManagement() {
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedOrder(null);
   };
 
   const filteredOrders = filterStatus
@@ -43,76 +55,85 @@ function OrderManagement() {
     : orders;
 
   return (
-    <div>
-      <h2>Gestión de Pedidos</h2>
-      <div>
-        <select 
-          value={filterStatus} 
+    <div className="p-6">
+      <h2 className="text-3xl font-bold mb-6 text-center">Gestión de Pedidos</h2>
+      <div className="mb-4 flex justify-center">
+        <select
+          value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
+          className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Todos los estados</option>
-          <option value="pending">Pendiente</option>
-          <option value="processing">En proceso</option>
-          <option value="shipped">Enviado</option>
-          <option value="delivered">Entregado</option>
-          <option value="cancelled">Cancelado</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Enviado">Enviado</option>
         </select>
       </div>
-      <table>
-        <thead>
+      <table className="min-w-full bg-white border border-gray-300 rounded shadow-lg">
+        <thead className="bg-gray-200">
           <tr>
-            <th>ID de Pedido</th>
-            <th>Cliente</th>
-            <th>Fecha</th>
-            <th>Total</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+            <th className="px-4 py-2 border">ID de Pedido</th>
+            <th className="px-4 py-2 border">Cliente</th>
+            <th className="px-4 py-2 border">Fecha</th>
+            <th className="px-4 py-2 border">Total</th>
+            <th className="px-4 py-2 border">Estado</th>
+            <th className="px-4 py-2 border">Acciones</th>
           </tr>
         </thead>
         <tbody>
           {filteredOrders.map((order) => (
-            <tr key={order._id}>
-              <td>{order._id}</td>
-              <td>{order.customer.name}</td>
-              <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-              <td>${order.total.toFixed(2)}</td>
-              <td>
+            <tr key={order._id} className="hover:bg-gray-100">
+              <td className="px-4 py-2 border">{order._id}</td>
+              <td className="px-4 py-2 border">{order.customer?.name || 'N/A'}</td>
+              <td className="px-4 py-2 border">{new Date(order.createdAt).toLocaleDateString()}</td>
+              <td className="px-4 py-2 border">${order.total.toFixed(2)}</td>
+              <td className="px-4 py-2 border">
                 <select
                   value={order.status}
                   onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                  className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="pending">Pendiente</option>
-                  <option value="processing">En proceso</option>
-                  <option value="shipped">Enviado</option>
-                  <option value="delivered">Entregado</option>
-                  <option value="cancelled">Cancelado</option>
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="Enviado">Enviado</option>
                 </select>
               </td>
-              <td>
-                <button onClick={() => handleViewDetails(order)}>Ver Detalles</button>
+              <td className="px-4 py-2 border">
+                <button
+                  className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded hover:bg-gradient-to-l transition duration-300"
+                  onClick={() => handleViewDetails(order)}
+                >
+                  Ver Detalles
+                </button>
+
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      
-      {selectedOrder && (
-        <div>
-          <h3>Detalles del Pedido</h3>
-          <p>ID de Pedido: {selectedOrder._id}</p>
-          <p>Cliente: {selectedOrder.customer.name}</p>
-          <p>Email: {selectedOrder.customer.email}</p>
-          <p>Dirección de Envío: {selectedOrder.shippingAddress}</p>
-          <h4>Productos:</h4>
-          <ul>
-            {selectedOrder.items.map((item) => (
-              <li key={item._id}>
-                {item.product.name} - Cantidad: {item.quantity} - Precio: ${item.price.toFixed(2)}
-              </li>
-            ))}
-          </ul>
-          <p>Total: ${selectedOrder.total.toFixed(2)}</p>
-          <button onClick={() => setSelectedOrder(null)}>Cerrar Detalles</button>
+
+      {isModalOpen && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center" onClick={closeModal}>
+          <div className="bg-white p-6 rounded shadow-lg max-w-md w-full" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-4">Detalles del Pedido</h3>
+            <p><strong>ID de Pedido:</strong> {selectedOrder._id}</p>
+            <p><strong>Cliente:</strong> {selectedOrder.customer?.name || 'N/A'}</p>
+            <p><strong>Email:</strong> {selectedOrder.customer?.email || 'N/A'}</p>
+            <p><strong>Dirección de Envío:</strong> {selectedOrder.shippingAddress || 'N/A'}</p>
+            <h4 className="mt-4 font-semibold">Productos:</h4>
+            <ul className="list-disc ml-6">
+              {selectedOrder.items?.map((item, index) => (
+                <li key={index} className="mb-1">
+                  {item.name || 'Producto desconocido'} - Cantidad: {item.quantity} - Precio: ${(item.price || 0).toFixed(2)}
+                </li>
+              )) || <li>No hay productos disponibles</li>}
+            </ul>
+            <p className="font-semibold"><strong>Total:</strong> ${selectedOrder.total.toFixed(2)}</p>
+            <button
+              className="mt-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition duration-300"
+              onClick={closeModal}
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
       )}
     </div>
