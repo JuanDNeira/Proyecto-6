@@ -4,7 +4,6 @@ import { confirmAlert } from 'react-confirm-alert';
 import { toast } from 'react-toastify';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import 'react-toastify/dist/ReactToastify.css';
-import { Edit2, Trash2 } from 'lucide-react';
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
