@@ -4,6 +4,7 @@ import InventoryManagement from './admin/InventoryManagement';
 import OrderManagement from './admin/OrderManagement';
 import UserManagement from './admin/UserManagement';
 import Analytics from './admin/Analytics';
+import EmailForm from './admin/EmailForm';
 
 function AdminDashboard() {
   const location = useLocation();
@@ -22,6 +23,7 @@ function AdminDashboard() {
               { path: "inventory", name: "Gestión de Inventario" },
               { path: "orders", name: "Gestión de Pedidos" },
               { path: "users", name: "Gestión de Usuarios" },
+              { path: "email", name: "Gestión de Correos" },
             ].map((item) => (
               <li key={item.path} className="mb-2">
                 <Link
@@ -45,6 +47,7 @@ function AdminDashboard() {
           <Route path="orders" element={<OrderManagement />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="email" element={<EmailForm />} />
         </Routes>
       </main>
     </div>
