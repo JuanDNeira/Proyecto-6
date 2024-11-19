@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 const emailRoutes = require('./routes/emailRoutes');
 
 
@@ -19,6 +20,7 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes')); 
+app.use('/api', analyticsRoutes);
 app.use('/api', emailRoutes);
 
 // Middleware para manejar errores

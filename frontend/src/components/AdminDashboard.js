@@ -23,6 +23,7 @@ function AdminDashboard() {
               { path: "inventory", name: "Gestión de Inventario" },
               { path: "orders", name: "Gestión de Pedidos" },
               { path: "users", name: "Gestión de Usuarios" },
+              { path: "analytics", name: "Gestión de Análisis" },
               { path: "email", name: "Gestión de Correos" },
             ].map((item) => (
               <li key={item.path} className="mb-2">
