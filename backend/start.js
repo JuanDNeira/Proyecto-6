@@ -12,7 +12,10 @@ connectDB();
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: 'https://proyecto-6-5l3wr0o4m-juandneiras-projects.vercel.app',
+  credentials: true
+}));
 app.use(express.json());
 
 // Rutas
