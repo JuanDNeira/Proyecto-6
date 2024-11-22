@@ -1,37 +1,30 @@
 import axios from 'axios';
 
-// Determinar la URL base según el entorno
-const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const baseURL = process.env.REACT_APP_API_URL || 'https://backend-l3gq.onrender.com';
 
 const instance = axios.create({
   baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json'
-  },
-  // Opcional: timeout para las peticiones
-  timeout: 10000,
-  // Opcional: si necesitas enviar cookies
-  withCredentials: true
+  }
 });
 
 // Interceptor para agregar el token a las solicitudes
-instance.interceptors.request.use(
-  config => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    
-    // Log para debugging (puedes removerlo en producción)
-    console.log('Request:', config.baseURL + config.url);
-    
-    return config;
-  }, 
-  error => {
-    console.error('Error en la solicitud:', error);
-    return Promise.reject(error);
+instance.interceptors.request.use(config => {
+  config.url = `/api${config.url}`;
+  
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+  
+  // Log para debugging
+  console.log('Request URL:', config.baseURL + config.url);
+  
+  return config;
+}, error => {
+  return Promise.reject(error);
+});
 
 // Interceptor para manejar respuestas y errores
 instance.interceptors.response.use(
