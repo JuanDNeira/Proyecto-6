@@ -13,7 +13,10 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: 'https://proyecto-6-alpha.vercel.app',
+  origin: [
+    'https://proyecto-6-alpha.vercel.app',
+    'https://proyecto-6-q1yv01kwd-juandneiras-projects.vercel.app'
+  ],
   credentials: true
 }));
 app.use(express.json());
